@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "recod",
+    "slug": "recod",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
