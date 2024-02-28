@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Recording Example</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.1.2/lame.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@material-ui/core/umd/material-ui.development.js"></script>
+  <script src="https://unpkg.com/@material-ui/icons/umd/material-ui-icons.development.js"></script>
+
+  <iframe src="https://www.pop917.com/liveStream.aspx?id=1"></iframe>
+
+  <script>
+    // JavaScript code goes here
+
+    // Add your existing JavaScript code here
+    const audioContext = new AudioContext();
+    const destination = audioContext.destination;
+
+    const iframe = document.querySelector('iframe');
+    const embeddedAudio = iframe.contentWindow.document.querySelector('video');
+
+    embeddedAudio.play();
+    const sourceNode = audioContext.createMediaElementSource(embeddedAudio);
+    sourceNode.connect(destination);
+
+    // Add the recording functionality here
+    let mediaRecorder;
+    const recordedChunks = [];
+
+    function startRecording() {
+      mediaRecorder = new MediaRecorder(destination.stream);
+      mediaRecorder.ondataavailable = function (event) {
+        recordedChunks.push(event.data);
+      };
+      mediaRecorder.start();
+    }
+
+    function stopRecording() {
+      mediaRecorder.stop();
+    }
+
+    function App() {
+      const [isRecording, setIsRecording] = React.useState(false);
+      const [downloadLink, setDownloadLink] = React.useState(null);
+
+      const toggleRecording = () => {
+        if (isRecording) {
+          stopRecording();
+          setIsRecording(false);
+        } else {
+          recordedChunks.length = 0; // Clear previously recorded chunks
+          startRecording();
+          setIsRecording(true);
+        }
+      };
+
+      const handleRecordingStop = () => {
+        const recordedBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+        const url = URL.createObjectURL(recordedBlob);
+        setDownloadLink(url);
+      };
+
+      return (
+        <div>
+          <h1>Audio Recording Example</h1>
+          <button id="record-button" onClick={toggleRecording}>
+            {isRecording ? (
+              <span>Stop</span>
+            ) : (
+              <span>Record</span>
+            )}
+          </button>
+          {downloadLink && (
+            <a href={downloadLink} download="recorded-audio.mp3">
+              Download Recorded Audio
+            </a>
+          )}
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById("root");
+    ReactDOM.render(<App />, rootElement);
+  </script>
+</body>
+
+</html>
