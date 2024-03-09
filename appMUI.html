@@ -8,9 +8,33 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.1.2/lame.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </head>
 
+<script>
+$.ajax({
+type: "POST",
+url: "https://www.pop917.com/ajax.aspx",
+data: "channelID=1&action=getLIVEURL",
+success: function(ajaxResult) {
+var video = document.getElementById('video');
+if (video.paused) {
+if (Hls.isSupported()) {
+var hls = new Hls();
+hls.loadSource(ajaxResult);
+hls.attachMedia(video);
+hls.on(Hls.Events.MANIFEST_PARSED, function() {
+video.play();
+});
+}
+}
+}
+});
+</script>
 <body>
+<iframe src="https://www.pop917.com/liveStream.aspx?id=1"></iframe>
+
   <div id="root"></div>
 
   <script src="https://unpkg.com/react/umd/react.development.js"></script>
@@ -18,11 +42,20 @@
   <script src="https://unpkg.com/@material-ui/core/umd/material-ui.development.js"></script>
   <script src="https://unpkg.com/@material-ui/icons/umd/material-ui-icons.development.js"></script>
 
-  <iframe src="https://www.pop917.com/liveStream.aspx?id=1"></iframe>
-
   <script>
     // JavaScript code goes here
+ 
+ const audioContext = new AudioContext();
+const destination = audioContext.destination;
 
+const iframe = document.querySelector('iframe');
+
+const embeddedAudio = iframe.contentWindow.document.querySelector('video');
+
+embeddedAudio.play();
+const sourceNode = audioContext.createMediaElementSource(embeddedAudio);
+
+sourceNode.connect(destination);
     // Add your existing JavaScript code here
     const audioContext = new AudioContext();
     const destination = audioContext.destination;
